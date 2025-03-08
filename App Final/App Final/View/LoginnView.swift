@@ -36,46 +36,11 @@ struct LoginnView: View {
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)
+                    .padding(.bottom, 80)
 
-                TextField("Email", text: $emailText)
-                    .focused($focusedField, equals: .email)
-                    .padding()
-                    .background(Color("textFieldColor"))
-                    .cornerRadius(12)
-                    .background (RoundedRectangle(cornerRadius: 12).stroke(!isValidEmail ? .red : focusedField == .email ? Color("Color-logo"): .white, lineWidth: 3))
-                    .padding(.horizontal)
+                EmailTetxField(emailText: $emailText, isValidEmail: $isValidEmail)
                 
-                    .onChange(of: emailText) {
-                        newValue in isValidEmail = Validator.validateEmail(newValue)
-                    }
-                if !isValidEmail {
-                    HStack {
-                        Text("Email invalido")
-                            .foregroundColor(.red)
-                            .padding(.leading)
-                        Spacer()
-                    }
-                }
-                
-                SecureField("Contraseña", text: $passwordText)
-                    .focused($focusedField, equals: .password)
-                    .padding()
-                    .background(Color("textFieldColor"))
-                    .cornerRadius(12)
-                    .background (RoundedRectangle(cornerRadius: 12).stroke(!isValidPassword ? .red : focusedField == .password ? Color("Color-logo"): .white, lineWidth: 3))
-                    .padding(.horizontal)
-                
-                    .onChange(of: passwordText) {
-                        newValue in isValidPassword = Validator.validatePassword(newValue)
-                    }
-                if !isValidPassword {
-                    HStack {
-                        Text("Contraseña Incorrecta")
-                            .foregroundColor(.red)
-                            .padding(.leading)
-                        Spacer()
-                    }
-                }
+                PasswordTextField(passwordText: $passwordText, isValidPassword: $isValidPassword, validatePassword: Validator.validatePassword, errorText: "Contraseña incorrecta", placeholder: "Contraseña")
                 
                 HStack {
                     Spacer()
@@ -87,6 +52,7 @@ struct LoginnView: View {
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .padding(.trailing)
+                    .padding(.vertical)
                         
                 }
                 
@@ -115,7 +81,7 @@ struct LoginnView: View {
                 .padding(.vertical)
                 .frame(maxWidth: .infinity)
                 .cornerRadius(12)
-                .padding(.horizontal)
+                .padding()
                 
                 BottomView()
                    
@@ -164,6 +130,74 @@ struct BottomView: View {
                 .cornerRadius(8)
             }
             
+        }
+    }
+}
+
+struct EmailTetxField: View {
+    @Binding var emailText: String
+    @Binding var isValidEmail: Bool
+    
+    @FocusState var focusedField: FocusedField?
+    
+    var body: some View {
+        VStack {
+            TextField("Email", text: $emailText)
+                .focused($focusedField, equals: .email)
+                .padding()
+                .background(Color("textFieldColor"))
+                .cornerRadius(12)
+                .background (RoundedRectangle(cornerRadius: 12).stroke(!isValidEmail ? .red : focusedField == .email ? Color("Color-logo"): .white, lineWidth: 3))
+                .padding(.horizontal)
+            
+                .onChange(of: emailText) {
+                    newValue in isValidEmail = Validator.validateEmail(newValue)
+                }
+                .padding(.bottom, isValidEmail ? 16 : 0)
+            
+            if !isValidEmail {
+                HStack {
+                    Text("Email invalido")
+                        .foregroundColor(.red)
+                        .padding(.leading)
+                    Spacer()
+                }
+                .padding(.bottom)
+            }
+        }
+    }
+}
+
+struct PasswordTextField: View {
+    @Binding var passwordText: String
+    @Binding var isValidPassword: Bool
+    let validatePassword: (String) -> Bool
+    let errorText: String
+    let placeholder: String
+    
+    @FocusState var focusedField: FocusedField?
+    
+    var body: some View {
+        VStack {
+            SecureField(placeholder, text: $passwordText)
+                .focused($focusedField, equals: .password)
+                .padding()
+                .background(Color("textFieldColor"))
+                .cornerRadius(12)
+                .background (RoundedRectangle(cornerRadius: 12).stroke(!isValidPassword ? .red : focusedField == .password ? Color("Color-logo"): .white, lineWidth: 3))
+                .padding(.horizontal)
+            
+                .onChange(of: passwordText) {
+                    newValue in isValidPassword = validatePassword(newValue)
+                }
+            if !isValidPassword {
+                HStack {
+                    Text(errorText)
+                        .foregroundColor(.red)
+                        .padding(.leading)
+                    Spacer()
+                }
+            }
         }
     }
 }
